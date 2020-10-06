@@ -1,0 +1,218 @@
+# HTTP(S) and SOCKS5 server on the same port
+mixed-port: 7891
+
+# Port of SOCKS5 proxy server on the local end
+socks-port: 1080
+
+# Transparent proxy server port for Linux and macOS
+redir-port: 17891
+
+allow-lan: true
+bind-address: "*"
+
+mode: rule
+# rule / global / direct (default is rule)
+
+log-level: silent
+# info / warning / error / debug / silent
+
+external-controller: 0.0.0.0:7892
+external-ui: yacd-gh-pages
+secret: ""
+
+
+dns:
+  enable: true
+  listen: 0.0.0.0:1053
+  ipv6: false
+
+  # These nameservers are used to resolve the DNS nameserver hostnames below Specify IP addresses only
+
+  default-nameserver:
+    - 114.114.114.114
+
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16 # Fake IP addresses pool CIDR
+  fake-ip-filter:
+    - '*.lan'
+    - localhost.ptlogin2.qq.com
+
+  nameserver:
+    - 114.114.114.114 # default value
+
+
+proxies:
+
+  # Trojan 自建节点 1
+  - name: Trojan01
+    type: trojan
+    server: game.ml  # 替换为你自己的 (共2处，第1处)
+    port: 443
+    password: pig9o9  # 替换为你自己的 (共2处，第2处)
+    udp: true
+    
+  # Trojan 自建节点 2
+  - name: Trojan02
+    type: trojan
+    server: abc.ml  # 替换为你自己的 (共2处，第1处)
+    port: 443
+    password: abcdefg  # 替换为你自己的 (共2处，第2处)
+    udp: true    
+
+  # V2ray 自建节点 1  Vmess+TLS+Websocket 方式
+  - name: V2ray01
+    type: vmess
+    server: game.ml  # 替换为你自己的 (共3处，第1处)
+    port: 443
+    uuid: b0983552-5382-4a6c-b5d3-59b9cf90cfe6  # 替换为你自己的  (共3处，第2处)
+    alterId: 2
+    cipher: auto
+    udp: true
+    tls: true
+    skip-cert-verify: false
+    network: ws
+    ws-path: /0ec3  # 替换为你自己的  (共3处，第3处)
+   
+  # V2ray 自建节点 2  Vmess+TLS+Websocket 方式
+  - name: V2ray02
+    type: vmess
+    server: game.ml  # 替换为你自己的  (共3处，第1处)
+    port: 443
+    uuid: b0983552-5382-4a6c-b5d3-59b9cf90cfe6  # 替换为你自己的  (共3处，第2处)
+    alterId: 2
+    cipher: auto
+    udp: true
+    tls: true
+    skip-cert-verify: false
+    network: ws
+    ws-path: /0ec3  # 替换为你自己的  (共3处，第3处)
+
+  # V2ray 搬瓦工 Just My Socks V2ray节点 1
+  - name: v3
+    type: vmess
+    server: abc3.jamjams.net  # 替换为你自己的  (共3处，第1处)
+    port: 8077  # 替换为你自己的  (共3处，第2处)
+    uuid: 4d76b58d-ca9d-41a7-81a5-55fe6f37e40a  # 替换为你自己的  (共3处，第3处)
+    alterId: 2
+    cipher: auto
+    udp: true
+    skip-cert-verify: false
+    network: tcp
+
+  # V2ray 搬瓦工 Just My Socks V2ray节点 2
+  - name: v4
+    type: vmess
+    server: abc4.jamjams.net  # 替换为你自己的  (共3处，第1处)
+    port: 8077  # 替换为你自己的  (共3处，第2处)
+    uuid: 4d76b58d-ca9d-41a7-81a5-55fe6f37e40a  # 替换为你自己的  (共3处，第3处)
+    alterId: 2
+    cipher: auto
+    udp: true
+    skip-cert-verify: false
+    network: tcp
+
+  # V2ray 搬瓦工 Just My Socks V2ray节点 3
+  - name: v5
+    type: vmess
+    server: abc5.jamjams.net  # 替换为你自己的  (共3处，第1处)
+    port: 8077  # 替换为你自己的  (共3处，第2处)
+    uuid: 4d76b58d-ca9d-41a7-81a5-55fe6f37e40a  # 替换为你自己的  (共3处，第3处)
+    alterId: 2
+    cipher: auto
+    udp: true
+    skip-cert-verify: false
+    network: tcp
+
+proxy-groups:
+  - name: "Fast"
+    type: url-test   # url-test 表示自动切换最快节点
+    proxies:
+      - Trojan01
+      - Trojan02
+      - V2ray01
+      - V2ray02
+      - v3
+      - v4
+      - v5
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+
+  - name: "FuckWall"
+    type: select   # select 表示手动选择节点
+    proxies:
+      - Fast
+      - Trojan01
+      - Trojan02
+      - V2ray01
+      - V2ray02
+      - v3
+      - v4
+      - v5
+
+rule-providers:
+  reject:
+    type: file
+    behavior: domain
+#    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt"
+    path: ./ruleset/reject.yaml
+    interval: 86400
+
+  icloud:
+    type: file
+    behavior: domain
+#    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/icloud.txt"
+    path: ./ruleset/icloud.yaml
+    interval: 86400
+
+  apple:
+    type: file
+    behavior: domain
+#    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt"
+    path: ./ruleset/apple.yaml
+    interval: 86400
+
+  google:
+    type: file
+    behavior: domain
+#    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/google.txt"
+    path: ./ruleset/google.yaml
+    interval: 86400
+
+  proxy:
+    type: file
+    behavior: domain
+#    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt"
+    path: ./ruleset/proxy.yaml
+    interval: 86400
+
+  direct:
+    type: file
+    behavior: domain
+#    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt"
+    path: ./ruleset/direct.yaml
+    interval: 86400
+
+  cncidr:
+    type: file
+    behavior: ipcidr
+#    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt"
+    path: ./ruleset/cncidr.yaml
+    interval: 86400
+
+  lancidr:
+    type: file
+    behavior: ipcidr
+#    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt"
+    path: ./ruleset/lancidr.yaml
+    interval: 86400
+
+rules:
+#  - RULE-SET,reject,REJECT
+#  - RULE-SET,icloud,DIRECT
+#  - RULE-SET,apple,DIRECT
+#  - RULE-SET,google,DIRECT
+#  - RULE-SET,proxy,FuckWall
+  - RULE-SET,direct,DIRECT
+#  - RULE-SET,lancidr,DIRECT,no-resolve
+#  - RULE-SET,cncidr,DIRECT,no-resolve
+  - MATCH,FuckWall
